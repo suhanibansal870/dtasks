@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🧡 d.tech AI Task Tracker</title>
-  <!-- Importing Custom Font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Apply the imported font to the body */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -16,13 +14,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
       min-height: 100vh;
-      overflow-x: hidden;
       padding: 20px 0;
     }
 
-    /* Header */
     h1 {
       color: #ff7f50;
       font-weight: 600;
@@ -31,7 +26,6 @@
       margin-bottom: 10px;
     }
 
-    /* Subtitle */
     .subtitle {
       font-size: 14px;
       color: #6b7280;
@@ -39,14 +33,12 @@
       margin-bottom: 15px;
     }
 
-    /* Task input bar */
     .task-bar {
       display: flex;
       gap: 12px;
       background-color: white;
       padding: 12px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      z-index: 10;
       width: 100%;
       max-width: 800px;
       margin-bottom: 20px;
@@ -60,7 +52,6 @@
       border: 2px solid #fdba74;
       border-radius: 8px;
       outline: none;
-      transition: border-color 0.3s ease;
     }
 
     input[type="text"]:focus {
@@ -75,14 +66,12 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
     }
 
     button:hover {
       background-color: #ea580c;
     }
 
-    /* Task Tracker Area */
     .task-container {
       width: 100%;
       max-width: 800px;
@@ -100,8 +89,6 @@
       min-height: 400px;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      position: relative;
     }
 
     .task-column h2 {
@@ -121,12 +108,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
     }
 
-    .task-item span {
-      font-size: 14px;
-      color: #333;
+    .task-item.done {
+      background-color: #d1fae5;
+      color: #065f46;
+      font-weight: bold;
     }
 
     .task-item.dragging {
@@ -163,7 +150,7 @@
 
     #celebration {
       position: fixed;
-      top: 10px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: #34d399;
@@ -173,34 +160,20 @@
       font-size: 18px;
       display: none;
       z-index: 1000;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
       font-weight: 600;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
 
-    .in-progress {
-      color: #f97316;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    canvas {
-      margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive Design for small screens */
     @media (max-width: 600px) {
       .task-container {
         flex-direction: column;
         gap: 10px;
       }
-      
+
       .task-column {
         width: 100%;
       }
     }
-
   </style>
 </head>
 <body>
@@ -219,100 +192,37 @@
 
   <div id="celebration">🎉 You're unstoppable! Task Completed! Keep going! 🎉</div>
 
-  <div id="inProgressMessage" class="in-progress"></div>
-
-  <!-- Task Tracker Area -->
   <div class="task-container">
-    <!-- Columns for tasks -->
-    <div class="task-column" id="todoColumn" ondrop="drop(event, 0)" ondragover="allowDrop(event)">
+    <div class="task-column" ondrop="drop(event, 0)" ondragover="allowDrop(event)">
       <h2>To Do</h2>
       <div id="todoTasks"></div>
     </div>
-    <div class="task-column" id="inProgressColumn" ondrop="drop(event, 1)" ondragover="allowDrop(event)">
+    <div class="task-column" ondrop="drop(event, 1)" ondragover="allowDrop(event)">
       <h2>In Progress</h2>
       <div id="inProgressTasks"></div>
     </div>
-    <div class="task-column" id="doneColumn" ondrop="drop(event, 2)" ondragover="allowDrop(event)">
+    <div class="task-column" ondrop="drop(event, 2)" ondragover="allowDrop(event)">
       <h2>Done</h2>
       <div id="doneTasks"></div>
     </div>
   </div>
 
-  <div class="delete-zone" id="deleteZone" ondrop="deleteTaskFromZone(event)" ondragover="allowDrop(event)">
+  <div class="delete-zone" ondrop="deleteTaskFromZone(event)" ondragover="allowDrop(event)">
     Drag tasks here to delete
   </div>
 
   <script>
     let tasks = [];
-    const categories = ['To Do', 'In Progress', 'Done'];
+    let draggedTaskId = null;
 
     function addTask() {
       const input = document.getElementById('taskInput');
       const text = input.value.trim();
       if (!text) return;
-
-      const newTask = {
-        id: tasks.length + 1,
-        text: text,
-        category: 0
-      };
-      
-      tasks.push(newTask);
+      tasks.push({ id: Date.now(), text, category: 0 });
       input.value = '';
-
       renderTasks();
     }
-
-    function deleteTask(id) {
-      tasks = tasks.filter(task => task.id !== id);
-      renderTasks();
-    }
-
-    function moveTask(id, newCategory) {
-      const task = tasks.find(task => task.id === id);
-      if (task) {
-        task.category = newCategory;
-        renderTasks();
-      }
-    }
-
-    function renderTasks() {
-      const todoTasks = tasks.filter(task => task.category === 0);
-      const inProgressTasks = tasks.filter(task => task.category === 1);
-      const doneTasks = tasks.filter(task => task.category === 2);
-
-      // Clear all task columns
-      document.getElementById('todoTasks').innerHTML = '';
-      document.getElementById('inProgressTasks').innerHTML = '';
-      document.getElementById('doneTasks').innerHTML = '';
-
-      // Render tasks into respective columns
-      todoTasks.forEach(task => {
-        document.getElementById('todoTasks').innerHTML += `
-          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
-            <span>${task.text}</span>
-          </div>
-        `;
-      });
-
-      inProgressTasks.forEach(task => {
-        document.getElementById('inProgressTasks').innerHTML += `
-          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
-            <span>${task.text}</span>
-          </div>
-        `;
-      });
-
-      doneTasks.forEach(task => {
-        document.getElementById('doneTasks').innerHTML += `
-          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
-            <span>${task.text}</span>
-          </div>
-        `;
-      });
-    }
-
-    let draggedTaskId = null;
 
     function startDrag(event) {
       draggedTaskId = event.target.id.split('-')[1];
@@ -325,22 +235,50 @@
 
     function drop(event, newCategory) {
       event.preventDefault();
-      const taskId = draggedTaskId;
-      const task = tasks.find(task => task.id === parseInt(taskId));
-      if (task) {
+      const task = tasks.find(t => t.id == draggedTaskId);
+      if (task && task.category !== newCategory) {
         task.category = newCategory;
         renderTasks();
+        showCelebration(newCategory);
       }
     }
 
     function deleteTaskFromZone(event) {
       event.preventDefault();
-      const taskId = draggedTaskId;
-      tasks = tasks.filter(task => task.id != taskId);
+      tasks = tasks.filter(t => t.id != draggedTaskId);
       renderTasks();
     }
 
-  </script>
+    function showCelebration(category) {
+      const msg = document.getElementById('celebration');
+      if (category === 1) {
+        msg.textContent = "🔥 Let's get it done! Task In Progress!";
+      } else if (category === 2) {
+        msg.textContent = "🎉 You're unstoppable! Task Completed! Keep going! 🎉";
+      } else {
+        return;
+      }
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
 
+    function renderTasks() {
+      document.getElementById('todoTasks').innerHTML = '';
+      document.getElementById('inProgressTasks').innerHTML = '';
+      document.getElementById('doneTasks').innerHTML = '';
+
+      tasks.forEach(task => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task-item';
+        if (task.category === 2) taskDiv.classList.add('done');
+        taskDiv.id = `task-${task.id}`;
+        taskDiv.draggable = true;
+        taskDiv.ondragstart = startDrag;
+        taskDiv.innerHTML = `<span>${task.text}</span>`;
+        const parent = task.category === 0 ? 'todoTasks' : task.category === 1 ? 'inProgressTasks' : 'doneTasks';
+        document.getElementById(parent).appendChild(taskDiv);
+      });
+    }
+  </script>
 </body>
 </html>
