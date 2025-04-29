@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🧡 d.tech AI Task Tracker</title>
+  <!-- Importing Custom Font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Apply the imported font to the body */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px 0;
+    }
+
+    /* Header */
+    h1 {
+      color: #ff7f50;
+      font-weight: 600;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* Subtitle */
+    .subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    /* Task input bar */
+    .task-bar {
+      display: flex;
+      gap: 12px;
+      background-color: white;
+      padding: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 14px;
+      width: 70%;
+      border: 2px solid #fdba74;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #ff7f50;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 14px;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #ea580c;
+    }
+
+    /* Task Tracker Area */
+    .task-container {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .task-column {
+      width: 30%;
+      background-color: #ffedd5;
+      border-radius: 12px;
+      padding: 10px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    .task-column h2 {
+      text-align: center;
+      color: #b45309;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .task-item {
+      background-color: #fff;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .task-item span {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .task-item.dragging {
+      opacity: 0.5;
+    }
+
+    .delete-zone {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      border: 2px dashed #ff7f50;
+      background-color: #fff2e6;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .ai-link {
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    .ai-link a {
+      text-decoration: none;
+      color: #f97316;
+      font-weight: bold;
+    }
+
+    .ai-link a:hover {
+      text-decoration: underline;
+      color: #ea580c;
+    }
+
+    #celebration {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #34d399;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 18px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+    }
+
+    .in-progress {
+      color: #f97316;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    canvas {
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design for small screens */
+    @media (max-width: 600px) {
+      .task-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .task-column {
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>🧡 d.tech AI Task Tracker</h1>
+  <div class="subtitle">Transform your tasks and achieve greatness—one step at a time!</div>
+
+  <div class="task-bar">
+    <input type="text" id="taskInput" placeholder="What task are you crushing today?" />
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <div class="ai-link">
+    Need a little extra motivation? <a href="https://www.playlab.ai/project/cma2q4ftd1gdpq1ig130n1u91" target="_blank">Ask your AI Coach</a>
+  </div>
+
+  <div id="celebration">🎉 You're unstoppable! Task Completed! Keep going! 🎉</div>
+
+  <div id="inProgressMessage" class="in-progress"></div>
+
+  <!-- Task Tracker Area -->
+  <div class="task-container">
+    <!-- Columns for tasks -->
+    <div class="task-column" id="todoColumn" ondrop="drop(event, 0)" ondragover="allowDrop(event)">
+      <h2>To Do</h2>
+      <div id="todoTasks"></div>
+    </div>
+    <div class="task-column" id="inProgressColumn" ondrop="drop(event, 1)" ondragover="allowDrop(event)">
+      <h2>In Progress</h2>
+      <div id="inProgressTasks"></div>
+    </div>
+    <div class="task-column" id="doneColumn" ondrop="drop(event, 2)" ondragover="allowDrop(event)">
+      <h2>Done</h2>
+      <div id="doneTasks"></div>
+    </div>
+  </div>
+
+  <div class="delete-zone" id="deleteZone" ondrop="deleteTaskFromZone(event)" ondragover="allowDrop(event)">
+    Drag tasks here to delete
+  </div>
+
+  <script>
+    let tasks = [];
+    const categories = ['To Do', 'In Progress', 'Done'];
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newTask = {
+        id: tasks.length + 1,
+        text: text,
+        category: 0
+      };
+      
+      tasks.push(newTask);
+      input.value = '';
+
+      renderTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      renderTasks();
+    }
+
+    function moveTask(id, newCategory) {
+      const task = tasks.find(task => task.id === id);
+      if (task) {
+        task.category = newCategory;
+        renderTasks();
+      }
+    }
+
+    function renderTasks() {
+      const todoTasks = tasks.filter(task => task.category === 0);
+      const inProgressTasks = tasks.filter(task => task.category === 1);
+      const doneTasks = tasks.filter(task => task.category === 2);
+
+      // Clear all task columns
+      document.getElementById('todoTasks').innerHTML = '';
+      document.getElementById('inProgressTasks').innerHTML = '';
+      document.getElementById('doneTasks').innerHTML = '';
+
+      // Render tasks into respective columns
+      todoTasks.forEach(task => {
+        document.getElementById('todoTasks').innerHTML += `
+          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
+            <span>${task.text}</span>
+          </div>
+        `;
+      });
+
+      inProgressTasks.forEach(task => {
+        document.getElementById('inProgressTasks').innerHTML += `
+          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
+            <span>${task.text}</span>
+          </div>
+        `;
+      });
+
+      doneTasks.forEach(task => {
+        document.getElementById('doneTasks').innerHTML += `
+          <div class="task-item" id="task-${task.id}" draggable="true" ondragstart="startDrag(event)">
+            <span>${task.text}</span>
+          </div>
+        `;
+      });
+    }
+
+    let draggedTaskId = null;
+
+    function startDrag(event) {
+      draggedTaskId = event.target.id.split('-')[1];
+      event.target.classList.add('dragging');
+    }
+
+    function allowDrop(event) {
+      event.preventDefault();
+    }
+
+    function drop(event, newCategory) {
+      event.preventDefault();
+      const taskId = draggedTaskId;
+      const task = tasks.find(task => task.id === parseInt(taskId));
+      if (task) {
+        task.category = newCategory;
+        renderTasks();
+      }
+    }
+
+    function deleteTaskFromZone(event) {
+      event.preventDefault();
+      const taskId = draggedTaskId;
+      tasks = tasks.filter(task => task.id != taskId);
+      renderTasks();
+    }
+
+  </script>
+
+</body>
+</html>
