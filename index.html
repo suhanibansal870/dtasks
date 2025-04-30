@@ -14,50 +14,65 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 0;
+      padding: 20px;
+      padding-bottom: 80px;
+      min-height: 100vh;
     }
 
     h1 {
       color: #ff7f50;
-      font-weight: 600;
       font-size: 32px;
+      font-weight: 600;
       text-align: center;
     }
 
     .subtitle {
       font-size: 14px;
       color: #6b7280;
+      margin-bottom: 20px;
       text-align: center;
-      margin-bottom: 15px;
     }
 
     .task-bar {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 12px;
-      background-color: white;
-      padding: 12px;
+      background-color: #fff;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 16px;
       width: 100%;
       max-width: 800px;
       margin-bottom: 20px;
-      border-radius: 10px;
     }
 
-    input[type="text"] {
-      padding: 10px;
+    .task-bar input[type="text"] {
+      flex: 2;
+      min-width: 200px;
+      padding: 12px;
       font-size: 14px;
-      width: 70%;
       border: 2px solid #fdba74;
       border-radius: 8px;
-      outline: none;
     }
 
-    input[type="text"]:focus {
-      border-color: #ff7f50;
+    .deadline-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .deadline-wrapper input[type="date"] {
+      padding: 10px;
+      font-size: 14px;
+      border: 2px solid #fdba74;
+      border-radius: 8px;
     }
 
     button {
-      padding: 10px 15px;
+      padding: 12px 16px;
       font-size: 14px;
       background-color: #f97316;
       color: white;
@@ -71,39 +86,36 @@
     }
 
     .task-container {
+      display: flex;
+      gap: 20px;
       width: 100%;
       max-width: 800px;
-      display: flex;
       justify-content: space-between;
-      gap: 20px;
     }
 
     .task-column {
-      width: 30%;
+      flex: 1;
       background-color: #ffedd5;
       border-radius: 12px;
-      padding: 10px;
-      min-height: 400px;
-      display: flex;
-      flex-direction: column;
+      padding: 12px;
+      min-height: 200px;
     }
 
     .task-column h2 {
       text-align: center;
       color: #b45309;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .task-item {
-      background-color: #fff;
+      background-color: white;
       padding: 12px;
       margin-bottom: 10px;
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       cursor: move;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
       white-space: normal;
+      word-wrap: break-word;
     }
 
     .task-item.done {
@@ -112,15 +124,30 @@
       font-weight: bold;
     }
 
+    .task-item.in-progress {
+      background-color: #fef08a;
+      color: #9a7d00;
+    }
+
     .delete-zone {
-      margin-top: 20px;
-      width: 100%;
-      max-width: 800px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       padding: 20px;
-      border: 2px dashed #ff7f50;
-      background-color: #fff2e6;
-      border-radius: 10px;
+      background-color: #ffe4e6;
+      border-top: 3px dashed #ef4444;
       text-align: center;
+      color: #991b1b;
+      font-weight: bold;
+      font-size: 16px;
+      z-index: 1000;
+    }
+
+    .delete-zone.drag-over {
+      background-color: #fecaca;
+      border-color: #dc2626;
+      color: #7f1d1d;
     }
 
     .ai-link {
@@ -129,9 +156,9 @@
     }
 
     .ai-link a {
-      text-decoration: none;
       color: #f97316;
       font-weight: bold;
+      text-decoration: none;
     }
 
     .ai-link a:hover {
@@ -140,19 +167,21 @@
     }
 
     #celebration {
-      position: relative;
-      top: 0;
-      margin: 20px 0;
-      background: #34d399;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background-color: #34d399;
       color: white;
       padding: 12px 24px;
       border-radius: 10px;
-      font-size: 18px;
+      font-size: 16px;
       display: none;
       z-index: 1000;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-      font-weight: 600;
-      text-align: center;
+    }
+
+    #celebration.show {
+      display: block;
     }
 
     @media (max-width: 600px) {
@@ -160,19 +189,27 @@
         flex-direction: column;
       }
 
-      .task-column {
+      .task-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      input[type="text"], input[type="date"], button {
         width: 100%;
       }
     }
   </style>
 </head>
 <body>
-
   <h1>🧡 d.tech AI Task Tracker</h1>
   <div class="subtitle">Transform your tasks and achieve greatness—one step at a time!</div>
 
   <div class="task-bar">
     <input type="text" id="taskInput" placeholder="What task are you crushing today?" />
+    <div class="deadline-wrapper">
+      <label for="deadlineInput">Optional Deadline 📅</label>
+      <input type="date" id="deadlineInput" />
+    </div>
     <button onclick="addTask()">Add Task</button>
   </div>
 
@@ -184,106 +221,127 @@
 
   <div class="task-container">
     <div class="task-column" ondrop="drop(event, 0)" ondragover="allowDrop(event)">
-      <h2>To Do</h2>
+      <h2>To Do <span id="todoCounter">(0)</span></h2>
       <div id="todoTasks"></div>
     </div>
     <div class="task-column" ondrop="drop(event, 1)" ondragover="allowDrop(event)">
-      <h2>In Progress</h2>
+      <h2>In Progress <span id="inProgressCounter">(0)</span></h2>
       <div id="inProgressTasks"></div>
     </div>
     <div class="task-column" ondrop="drop(event, 2)" ondragover="allowDrop(event)">
-      <h2>Done</h2>
+      <h2>Done <span id="doneCounter">(0)</span></h2>
       <div id="doneTasks"></div>
     </div>
   </div>
 
   <div class="delete-zone" ondrop="deleteTaskFromZone(event)" ondragover="allowDrop(event)">
-    Drag tasks here to delete
+    🗑️ Drag tasks here to delete
   </div>
 
   <script>
-    let tasks = [];
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let draggedTaskId = null;
 
+    document.getElementById('taskInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') addTask();
+    });
+
     function addTask() {
-      const input = document.getElementById('taskInput');
-      const text = input.value.trim();
+      const text = document.getElementById('taskInput').value.trim();
+      const deadline = document.getElementById('deadlineInput').value;
+
       if (!text) return;
 
       const newTask = {
-        id: tasks.length + 1,
-        text: text,
+        id: Date.now(),
+        text,
+        deadline,
         category: 0
       };
 
       tasks.push(newTask);
-      input.value = '';
+      saveTasks();
       renderTasks();
+
+      document.getElementById('taskInput').value = '';
+      document.getElementById('deadlineInput').value = '';
     }
 
     function renderTasks() {
-      ['todoTasks', 'inProgressTasks', 'doneTasks'].forEach(id => {
-        document.getElementById(id).innerHTML = '';
-      });
+      document.getElementById('todoTasks').innerHTML = '';
+      document.getElementById('inProgressTasks').innerHTML = '';
+      document.getElementById('doneTasks').innerHTML = '';
+
+      let todo = 0, progress = 0, done = 0;
 
       tasks.forEach(task => {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task-item' + (task.category === 2 ? ' done' : '');
-        taskDiv.id = 'task-' + task.id;
-        taskDiv.draggable = true;
-        taskDiv.ondragstart = startDrag;
-        taskDiv.innerHTML = `<span>${task.text}</span>`;
+        const div = document.createElement('div');
+        div.className = 'task-item' +
+                        (task.category === 2 ? ' done' : '') +
+                        (task.category === 1 ? ' in-progress' : '');
+        div.id = 'task-' + task.id;
+        div.draggable = true;
+        div.ondragstart = startDrag;
+
+        div.innerHTML = `<span>${task.text}</span>${task.deadline ? `<br><small>📅 Due: ${task.deadline}</small>` : ''}`;
 
         if (task.category === 0) {
-          document.getElementById('todoTasks').appendChild(taskDiv);
+          document.getElementById('todoTasks').appendChild(div);
+          todo++;
         } else if (task.category === 1) {
-          document.getElementById('inProgressTasks').appendChild(taskDiv);
+          document.getElementById('inProgressTasks').appendChild(div);
+          progress++;
         } else {
-          document.getElementById('doneTasks').appendChild(taskDiv);
+          document.getElementById('doneTasks').appendChild(div);
+          done++;
         }
       });
+
+      document.getElementById('todoCounter').textContent = `(${todo})`;
+      document.getElementById('inProgressCounter').textContent = `(${progress})`;
+      document.getElementById('doneCounter').textContent = `(${done})`;
     }
 
-    function startDrag(event) {
-      draggedTaskId = parseInt(event.target.id.split('-')[1]);
+    function startDrag(e) {
+      draggedTaskId = parseInt(e.target.id.split('-')[1]);
     }
 
-    function allowDrop(event) {
-      event.preventDefault();
+    function allowDrop(e) {
+      e.preventDefault();
     }
 
-    function drop(event, newCategory) {
-      event.preventDefault();
+    function drop(e, category) {
+      e.preventDefault();
       const task = tasks.find(t => t.id === draggedTaskId);
       if (task) {
-        const wasDone = task.category === 2;
-        const wasInProgress = task.category === 1;
-        task.category = newCategory;
+        task.category = category;
+        saveTasks();
         renderTasks();
 
-        if (newCategory === 2 && !wasDone) {
-          showCelebration("🎉 You're unstoppable! Task Completed! Keep going! 🎉");
-        } else if (newCategory === 1 && !wasInProgress) {
-          showCelebration("🔥 You're making progress! Keep it up! 🔥");
-        }
+        if (category === 2) showCelebration("🎉 You're unstoppable! Task Completed!");
+        else if (category === 1) showCelebration("🔥 You're making progress!");
       }
     }
 
-    function deleteTaskFromZone(event) {
-      event.preventDefault();
-      tasks = tasks.filter(task => task.id !== draggedTaskId);
+    function deleteTaskFromZone(e) {
+      e.preventDefault();
+      tasks = tasks.filter(t => t.id !== draggedTaskId);
+      saveTasks();
       renderTasks();
     }
 
-    function showCelebration(message) {
-      const msg = document.getElementById('celebration');
-      msg.innerText = message;
-      msg.style.display = 'block';
-      setTimeout(() => {
-        msg.style.display = 'none';
-      }, 3000);
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
     }
-  </script>
 
+    function showCelebration(message) {
+      const el = document.getElementById('celebration');
+      el.textContent = message;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    renderTasks();
+  </script>
 </body>
 </html>
