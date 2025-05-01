@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🧡 d.tech AI Task Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel = "icon" type = "image/x-icon" href = "dragon.webp">
+  <link rel="icon" type="image/x-icon" href="dragon.webp">
   <style>
     body {
       margin: 0;
@@ -151,22 +151,6 @@
       color: #7f1d1d;
     }
 
-    .ai-link {
-      font-size: 14px;
-      margin-top: 15px;
-    }
-
-    .ai-link a {
-      color: #f97316;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    .ai-link a:hover {
-      color: #ea580c;
-      text-decoration: underline;
-    }
-
     #celebration {
       position: fixed;
       top: 10px;
@@ -185,6 +169,40 @@
       display: block;
     }
 
+    /* Chatbot button */
+    #chatbot-button {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+    }
+
+    #chatbot-button:hover {
+      background-color: #ea580c;
+    }
+
+    #chatbot-iframe {
+      position: fixed;
+      bottom: 170px;
+      right: 20px;
+      width: 350px;
+      height: 500px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1000;
+    }
+
     @media (max-width: 600px) {
       .task-container {
         flex-direction: column;
@@ -197,6 +215,11 @@
 
       input[type="text"], input[type="date"], button {
         width: 100%;
+      }
+
+      #chatbot-iframe {
+        width: 90%;
+        right: 5%;
       }
     }
   </style>
@@ -215,10 +238,6 @@
   </div>
 
   <div id="celebration"></div>
-
-  <div class="ai-link">
-    Need a little extra motivation? <a href="https://www.playlab.ai/project/cma2q4ftd1gdpq1ig130n1u91" target="_blank">Ask your AI Coach</a>
-  </div>
 
   <div class="task-container">
     <div class="task-column" ondrop="drop(event, 0)" ondragover="allowDrop(event)">
@@ -239,12 +258,21 @@
     🗑️ Drag tasks here to delete
   </div>
 
+  <!-- Chatbot Embed -->
+  <button id="chatbot-button" title="Chat with AI">💬</button>
+  <iframe id="chatbot-iframe" src="https://www.playlab.ai/embedded/cma5o0o0f0hqjopiitqiunr1d" allow="clipboard-write"></iframe>
+
   <script>
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let draggedTaskId = null;
 
     document.getElementById('taskInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') addTask();
+    });
+
+    document.getElementById('chatbot-button').addEventListener('click', () => {
+      const iframe = document.getElementById('chatbot-iframe');
+      iframe.style.display = iframe.style.display === 'none' ? 'block' : 'none';
     });
 
     function addTask() {
@@ -283,7 +311,6 @@
         div.id = 'task-' + task.id;
         div.draggable = true;
         div.ondragstart = startDrag;
-
         div.innerHTML = `<span>${task.text}</span>${task.deadline ? `<br><small>📅 Due: ${task.deadline}</small>` : ''}`;
 
         if (task.category === 0) {
